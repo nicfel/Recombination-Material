@@ -1,0 +1,57 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.math.distributions
+                 :feast.simulation
+                 :recombination.network
+                 :recombination.statistics
+                 :recombination.simulator
+                 :recombination.operators
+                 :recombination.distribution">
+
+    <run spec="GPSimulator" nSims="1">
+        <simulationObject id="network_truth" spec="SimulatedCoalescentRecombinationNetwork" conditionCoalescence="true" fileName="$(filebase).tree" recombinationRatesChangePoints="4000" totalLength="10000">
+          <populationModel spec="ConstantPopulation">
+              <popSize spec="RealParameter" value="insert_Ne"/>
+          </populationModel>
+
+            <recombinationRate spec="RealParameter" value="insert_reassortment"/>
+            <relativeRecombinationRate spec="RealParameter" value="insert_rel_rates"/>
+
+
+            <taxonSet spec="TaxonSet" id="taxonSet">
+              insert_taxa
+            </taxonSet>
+
+            <traitSet spec="TraitSet" traitname="date-backward" id="traitSet">
+              insert_sampling_times
+              <taxa idref="taxonSet"/>
+            </traitSet>
+        </simulationObject>
+
+        <simulationObject id="seg1align" spec="recombination.util.SimulatedNetworkAlignment" outputFileName="$(filebase).nexus"
+                   recombinationNetwork="@network_truth">
+             <siteModel spec="SiteModel"  gammaCategoryCount="4">
+                <shape spec="RealParameter" value="insert_gamma"/>
+                <mutationRate spec="RealParameter" value="insert_mut"/>
+                <substModel spec="HKY">
+                  <frequencies spec="Frequencies">
+                    <frequencies spec="RealParameter" value="insert_freq"/>
+                  </frequencies>
+                  <kappa spec="RealParameter" value="insert_kappa"/>
+                </substModel>
+              </siteModel>
+        </simulationObject>
+
+
+    </run>
+
+</beast>

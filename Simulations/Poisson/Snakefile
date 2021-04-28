@@ -1,0 +1,27 @@
+import glob
+
+# Assume files are named like `inf1.xml`, `inf2.xml`, etc.
+# get a list of these files from the current directory.
+input_files = glob.glob("inf*.xml")
+
+# Create desired output filenames for each input.
+output_files = [input_file.replace(".xml",".out") for input_file in input_files]
+
+# The "all" rule aggregates all the desired outputs.
+rule all:
+    input: output_files
+    
+# The "runsim" rule runs an individual simulation
+# for a given input file. We use the fact that files
+# are named like `inf1.xml` to grab the numeric part
+# of the input filename and use it in the shell command.
+
+rule runsim:
+    input: "inf{iteration}.xml"
+    output: "inf{iteration}.out"
+    resources:
+        mem_mb=8000
+    shell:
+        """
+        ~/jar/random Recombination {wildcards.iteration} {input} > {output}
+        """

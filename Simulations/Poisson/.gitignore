@@ -1,0 +1,12 @@
+.DS_Store
+/combined/
+/network/
+/inference/
+/out/
+/simout/
+/simulation/
+/treeinfout/
+/treeout/
+/trees/
+/target/
+/mcc/
