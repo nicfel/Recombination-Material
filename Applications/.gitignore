@@ -1,0 +1,13 @@
+/sars-cov-1/
+/combined/
+/out/
+/mers/
+/out-spike/
+/reference/
+/tmp/
+*rep1*
+*rep2*
+
+*out
+*log
+*trees
