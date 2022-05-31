@@ -1,0 +1,182 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.math.distributions
+                 :feast.simulation
+                 :feast.fileio
+                 :recombination.network
+                 :recombination.statistics
+                 :recombination.simulator
+                 :recombination.likelihood
+                 :recombination.operators
+                 :recombination.distribution
+                 :recombination.util">
+
+    <alignment id="seg1align" spec="AlignmentFromNexus" fileName="insert_sim_file_name.nexus"/>
+
+    <taxonSet spec="TaxonSet" id="taxonSet">
+      insert_taxa
+    </taxonSet>
+
+    <traitSet spec="TraitSet" traitname="date-backward" id="traitSet">
+      insert_sampling_times
+      <taxa idref="taxonSet"/>
+    </traitSet>
+
+
+    <run spec="MCMC" chainLength="10000000">
+        <state>
+            <stateNode id="recombinationRate" spec="RealParameter" value="initial_reassortment"/>
+            <stateNode id="mut1" spec="RealParameter" value="0.0025"/>
+
+            <stateNode id="popSize" spec="RealParameter" value="initial_Ne"/>
+            <stateNode id="relativeRecombinationRate" spec="RealParameter" value="initial_rel_rates"/>
+
+
+            <stateNode id="network" spec="SimulatedCoalescentRecombinationNetwork"
+                       data="@seg1align">
+
+                <traitSet idref="traitSet"/>
+
+                <populationModel spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="initial_Ne"/>
+                </populationModel>
+
+                <recombinationRate spec="RealParameter" value="0"/>
+            </stateNode>
+        </state>
+
+        <distribution id="posterior" spec="CompoundDistribution">
+
+          <distribution id="likelihood" spec="CompoundDistribution">
+              <distribution spec="NetworkLikelihood">
+                  <data idref="seg1align"/>
+                  <recombinationNetwork idref="network"/>
+                  <siteModel spec="SiteModel" mutationRate="@mut1">
+                    <substModel spec="JukesCantor"/>
+                  </siteModel>
+              </distribution>
+          </distribution>
+
+            <distribution id="prior" spec="CompoundDistribution">
+                <distribution id="coalDensity" spec="CoalescentWithRecombination" maxHeightRatio="1.1">
+                  <networkIntervals spec="RecombinationNetworkIntervals" recombinationNetwork="@network"/>
+
+                    <populationModel id="constantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
+<!--                    <relativeRecombinationRate idref="relativeRecombinationRate"/>-->
+                    <recombinationRate idref="recombinationRate"/>
+                </distribution>
+
+                <distribution id="parametersPrior" spec="CompoundDistribution">
+                    <distribution spec="beast.math.distributions.Prior" x="@recombinationRate">
+                        <!--distr spec="beast.math.distributions.Uniform" lower="0.0" upper="10.0"/-->
+                        <distr spec="beast.math.distributions.LogNormalDistributionModel" M="-11.1271" S="0.5"/>
+                    </distribution>
+                    
+                    <distribution spec="beast.math.distributions.Prior" x="@relativeRecombinationRate">
+                        <!--distr spec="beast.math.distributions.Uniform" lower="0.0" upper="10.0"/-->
+                        <distr spec="beast.math.distributions.Normal" mean="0" sigma="1"/>
+                    </distribution>
+
+
+                    <distribution spec="beast.math.distributions.Prior" x="@popSize">
+                        <!--distr spec="beast.math.distributions.Uniform" lower="0.0" upper="10.0"/-->
+                        <distr spec="beast.math.distributions.LogNormalDistributionModel" M="1.4844" S="0.5"/>
+                    </distribution>
+
+<!--                    <distribution spec="beast.math.distributions.Prior" x="@kappa1">-->
+<!--                        <distr spec="beast.math.distributions.LogNormalDistributionModel" M="-1.1250" S="1.5"/>-->
+<!--                    </distribution>-->
+
+
+                    <distribution spec="beast.math.distributions.Prior" x="@mut1">
+                        <distr spec="beast.math.distributions.LogNormalDistributionModel" M="-6.1165" S="0.5"/>
+                    </distribution>
+
+<!--                    <distribution spec="beast.math.distributions.Prior" x="@gam1">-->
+<!--                        <distr spec="beast.math.distributions.Exponential" mean="1"/>-->
+<!--                    </distribution> -->
+                </distribution>
+            </distribution>
+        </distribution>
+
+
+        <operator id="ReassortmentOperator" spec="ScaleOperator"
+                  weight="5.0" scaleFactor="0.8"  optimise="true"  parameter="@recombinationRate">
+        </operator>
+        
+<!--        <operator id="RelativeReassortmentOperator" spec="RealRandomWalkOperator"-->
+<!--                  weight="5.0" windowSize="0.8"  useGaussian="true"  parameter="@relativeRecombinationRate">-->
+<!--        </operator>-->
+
+
+        <operator id="PopSizeScaler" spec="ScaleOperator"
+                  weight="5.0"  scaleFactor="0.8" optimise="true" parameter="@popSize">
+        </operator>
+
+
+        <operator id="Mut1Operator" spec="ScaleOperator" weight="1.0" scaleFactor="0.8"  optimise="true"  parameter="@mut1"/>
+
+        <operator spec="DivertLociOperator" network="@network" weight="20"/>
+
+        <operator spec="UniformRecombinationNetworkNodeHeightOperator" network="@network" weight="3.0"/>
+        <operator spec="RecombinationNetworkScaleOperator" network="@network" scaleRootOnly="true" weight="3.0"/>
+        <operator spec="RecombinationNetworkScaleOperator" network="@network" weight="1.0" scaleFactor="0.99"/>
+
+        <operator spec="GibbsOperatorAboveLociRoots" network="@network" weight="1">
+          <coalescentWithRecombination idref="coalDensity"/>
+        </operator>
+
+        <operator id="updown" spec="RecombinationNetworkScaleOperator" network="@network" weight="3.0" scaleFactor="0.99">
+          <upParameter idref="popSize"/>
+          <downParameter idref="recombinationRate"/>
+          <downParameter idref="mut1"/>
+        </operator>
+
+        <operator spec="RecombinationNetworkExchange" isNarrow="true" network="@network" weight="30.0"/>
+        <operator spec="RecombinationNetworkExchange" isNarrow="false" network="@network" weight="10.0"/>
+
+        <operator spec="DivertLociOperator" network="@network" weight="30"/>
+        <operator spec="SubRecombinationNetworkSlide" network="@network" weight="10.0"/>
+        <operator spec="AddRemoveRecombination" network="@network" weight="30" alpha="0.25"/>
+        <operator spec="LocalAddRemoveRecombinationCoalescent" coalescentWithRecombination="@coalDensity" network="@network" weight="100"/>
+
+
+        <logger spec="Logger" logEvery="10000" mode="tree" fileName="$(filebase).trees">
+            <log idref="network"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="10000" fileName="$(filebase).log">
+          <log idref="posterior"/>
+          <log idref="likelihood"/>
+          <log idref="coalDensity"/>
+          <log spec="RecombinationNetworkStatsLogger" recombinationNetwork="@network"/>
+          <log spec="LocusStatsLogger" recombinationNetwork="@network" locus="0"/>
+          <log spec="LocusStatsLogger" recombinationNetwork="@network" locus="9999"/>
+          <log spec="LocusStatsLogger" recombinationNetwork="@network" locus="19999"/>
+          <log spec="LocusStatsLogger" recombinationNetwork="@network" locus="29999"/>
+          <log idref="recombinationRate"/>
+          <log idref="relativeRecombinationRate"/>
+          <log idref="popSize"/>
+          <log idref="mut1"/>
+<!--          <log idref="kappa1"/>-->
+<!--          <log idref="gam1"/>-->
+<!--          <log idref="freq1"/>-->
+        </logger>
+
+        <logger spec="Logger" logEvery="10000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log spec="ESS" arg="@posterior"/>
+        </logger>
+
+    </run>
+</beast>
