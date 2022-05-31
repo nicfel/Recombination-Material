@@ -42,7 +42,7 @@ trim_ends = 100;
 map = tdfread('reference/name_map.tsv','\t');
 
 for i = 1 : length(name)-1
-    if i<6
+    if i < 6
         disp(name{i})
         protein = tdfread(['reference/' name{i} '.tsv'],'\t');
         gb = genbankread(['reference/' name{i} '.gb']);
@@ -59,8 +59,8 @@ for i = 1 : length(name)-1
             end
         end
 
-        from = protein.from(index) + trim_ends;
-        to = protein.to(index) + trim_ends;
+        from = protein.from(index);
+        to = protein.to(index);
         buildXML(rngs(i), [name{i} '_all'], file_directory{i}, nr_samples(i), samplesamples(i), methods(i), 0, fixrate(i), 0.1, nr_reps, {''}, 100, -1, [from, to]);    
     else
         buildXML(rngs(i), [name{i} '_all'], file_directory{i}, nr_samples(i), samplesamples(i), methods(i), 0, fixrate(i), 0.9, nr_reps, exclude, 100, -1, [1]);    
@@ -141,6 +141,7 @@ for i = 1 : 5
         end
         fclose(f);
     else
+        disp(name{i})
         index = -1;
         for j = 1 : size(protein.protein,1)
     %         disp(protein.protein(j,:))
@@ -210,6 +211,5 @@ for i = 1 : 5
         disp('lla')
     end
     buildXML(rngs(i), [name{i} '_subunits'], file_directory{i}, nr_samples(i), samplesamples(i), methods(i), 0, fixrate(i), 0.25, nr_reps, {''}, from, to, bP);
-    
 end
 

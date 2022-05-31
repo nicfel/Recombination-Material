@@ -39,9 +39,9 @@ pdf("../../Recombination-Text/Figures/sars_like_densi.pdf", width=15, height=8, 
 
 end_point = 3000
 
-densiTree(tree.plot, col=color, alpha=0.02, width=4, scale.bar=T, underscore=T)
+densiTree(tree.plot, col=color, alpha=0.02, width=4, scale.bar=F, underscore=T)
 axis(1,at=c((end_point-2020)/end_point,(end_point-1520)/end_point,(end_point-1020)/end_point,(end_point-520)/end_point,end_point/end_point), 
-     labels=c(0,500,1000,1500,2020),col.axis="red", las=2)
+     labels=c(0,500,1000,1500,2020),col.axis="black", las=1)
 legend("bottom", inset=.05, title="",border="white",box.col="white",
        c("5' of spike","spike","3' of spike"), fill=cols, horiz=F)
 # axisPhylo(side = 1)

@@ -42,6 +42,8 @@ t = read.table("./combined/sars-like_all.wuhan.tsv", header=T, sep="\t")
 
 # read genbak file for sars-like
 require("genbankr")
+require("gggenes")
+
 gb = readGenBank(paste(this.dir, "/reference/sars-like.gb", sep="/"))
 gen_data = data.frame(min=as.numeric(gb@cds@ranges@start), width=as.numeric(gb@cds@ranges@width), gene=gb@cds$gene)
 
@@ -57,7 +59,6 @@ mrsi=2019
 breaks = c(0,19,49,119,219,419,1019)
 
 
-require("gggenes")
 
 gen_data$min = gen_data$min-100
 
@@ -223,4 +224,71 @@ p = ggplot(t) +
 plot(p)
 
 ggsave(paste("../../Recombination-Text/Figures/commonAncestorTime.sars1.pdf", sep=""), plot=p, width=8 ,heigh=4)
+
+
+
+system(paste("java -Xmx16g -jar ../Software/CommonAncestorHeights.jar -burnin 0 -sequence bat\\_SL\\_CoVZXC21\\|2015", trees[9], gsub("*.pruned", ".zxc21.tsv", trees[9]), sep=" "))
+system(paste("java -Xmx16g -jar ../Software/CommonAncestorHeights.jar -burnin 0 -sequence bat\\_SL\\_CoVZC45\\|2017", trees[9], gsub("*.pruned", ".zc45.tsv", trees[9]), sep=" "))
+
+
+t = read.table("./combined/sars-like_all.zxc21.tsv", header=T, sep="\t")
+name = c("SARS-CoV-1",
+         "RmYN02",
+         "P2S",
+         "RaTG13",
+         "SARS-CoV-2")
+
+t = t[is.element(t$name, compareto), ]
+t$plotname = ""
+for(i in seq(1,length(name))){
+  t[which(t$name== compareto[[i]]), "plotname"] = name[[i]]
+}
+
+t = t[which(t$lower>0),]
+p = ggplot(t) +
+  geom_ribbon(aes(x=position, ymin=lower, ymax=upper, fill=plotname, group=plotname), alpha=0.2)+
+  geom_line(aes(x=position, y=median, color=plotname, group=plotname))+
+  theme_minimal() +
+  scale_fill_manual(name="",values=cols)+
+  scale_color_manual(name="",values=cols)+
+  theme(legend.position = "top", legend.direction = "vertical", legend.title = element_blank()) +
+  ylab("common ancestor time\nwith ZXC21")+
+  xlab("")+
+  coord_cartesian(ylim = c(20,1200))+
+  scale_y_log10(breaks=breaks, labels=mrsi-breaks) +
+  guides(fill=guide_legend(nrow=1,byrow=TRUE)) +
+  geom_gene_arrow(data=gen_data, aes(xmin = min, xmax = min+width, y = 20), arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1, "mm"))+
+  geom_gene_label(data=gen_data, aes(xmin = min, xmax = min+width, y = 20, label = gene), align = "left")
+plot(p)
+
+ggsave(paste("../../Recombination-Text/Figures/commonAncestorTime.zxc21.png", sep=""), plot=p, width=8 ,heigh=4)
+
+
+
+t = read.table("./combined/sars-like_all.zc45.tsv", header=T, sep="\t")
+
+t = t[is.element(t$name, compareto), ]
+t$plotname = ""
+for(i in seq(1,length(name))){
+  t[which(t$name== compareto[[i]]), "plotname"] = name[[i]]
+}
+
+t = t[which(t$lower>0),]
+p = ggplot(t) +
+  geom_ribbon(aes(x=position, ymin=lower, ymax=upper, fill=plotname, group=plotname), alpha=0.2)+
+  geom_line(aes(x=position, y=median, color=plotname, group=plotname))+
+  theme_minimal() +
+  scale_fill_manual(name="",values=cols)+
+  scale_color_manual(name="",values=cols)+
+  theme(legend.position = "top", legend.direction = "vertical", legend.title = element_blank()) +
+  ylab("common ancestor time\nwith ZC45")+
+  xlab("")+
+  coord_cartesian(ylim = c(20,1200))+
+  scale_y_log10(breaks=breaks, labels=mrsi-breaks) +
+  guides(fill=guide_legend(nrow=1,byrow=TRUE)) +
+  geom_gene_arrow(data=gen_data, aes(xmin = min, xmax = min+width, y = 20), arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1, "mm"))+
+  geom_gene_label(data=gen_data, aes(xmin = min, xmax = min+width, y = 20, label = gene), align = "left")
+plot(p)
+
+ggsave(paste("../../Recombination-Text/Figures/commonAncestorTime.zc45.png", sep=""), plot=p, width=8 ,heigh=4)
 
