@@ -1,6 +1,6 @@
 # A Bayesian coalescent approach to detect recombination patterns in coronaviruses
 
-Nicola F. Müller<sup>\*†1</sup>, Kathryn E. Kistler<sup>1,2</sup>, Trevor Bedford<sup>1,2,3</sup>
+Nicola F. Müller<sup>1</sup>, Kathryn E. Kistler<sup>1,2</sup>, Trevor Bedford<sup>1,2,3</sup>
 
 <sup>1</sup>Vaccine and Infectious Disease Division, Fred Hutchinson Cancer Research Center, Seattle, WA, USA.<br/>
 <sup>2</sup>Molecular and Cellular Biology Program, University of Washington, Seattle, WA, USA<br/>
