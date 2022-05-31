@@ -383,7 +383,7 @@
 
             <distribution id="prior" spec="CompoundDistribution">
               <distribution id="coalDensity" spec="CoalescentWithRecombination" maxHeightRatio="1.5">
-                  <networkIntervals spec="RecombinationNetworkIntervals" recombinationNetwork="@network"  recombinationRatesChangePoints="20487 24560 "/>
+                  <networkIntervals spec="RecombinationNetworkIntervals" recombinationNetwork="@network"  recombinationRatesChangePoints="20387 24460 "/>
 
                     <populationModel id="constantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
 
